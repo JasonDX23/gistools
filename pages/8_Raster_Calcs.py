@@ -12,9 +12,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Load credentials from Streamlit secrets
-service_account = st.secrets['SERVICE_ACCOUNT']
-private_key_dict = st.secrets['ee_service']  # Should be a dictionary, not a file path
 token = st.secrets['EARTHENGINE_TOKEN']
 geemap.ee_initialize(token_name=token)
 
