@@ -35,4 +35,4 @@ if layers is not None:
     for layer in layers:
         m.add_wms_layer(wms_url, layers=layer, name=layer)
 
-m.to_streamlit()
+m.to_streamlit(height=500)

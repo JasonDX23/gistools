@@ -14,9 +14,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 service_account = st.secrets['SERVICE_ACCOUNT']
-private_key = st.secrets['ee_service']
+private_key_dict = st.secrets['ee_service']
 
-credentials = ee.ServiceAccountCredentials(service_account, private_key)
+credentials = ee.ServiceAccountCredentials.from_service_account_info(private_key_dict)
 ee.Initialize(credentials)
 
 st.title('Raster Calculator')
