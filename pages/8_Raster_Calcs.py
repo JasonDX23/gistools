@@ -15,8 +15,8 @@ st.markdown("""
 # Load credentials from Streamlit secrets
 service_account = st.secrets['SERVICE_ACCOUNT']
 private_key_dict = st.secrets['ee_service']  # Should be a dictionary, not a file path
-
-geemap.ee_initialize()
+token = st.secrets['EARTHENGINE_TOKEN']
+geemap.ee_initialize(token_name=token)
 
 st.title('Raster Calculator')
 st.write('Calculate indices such as NDVI, NDMI, NDWI and more for your region of interest')
