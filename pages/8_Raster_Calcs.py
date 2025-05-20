@@ -4,8 +4,6 @@ import streamlit as st
 import geemap.foliumap as geemap
 import datetime
 import json
-from ee import oauth
-from google.oauth2 import service_account
 st.markdown("""
 <style>
 #GithubIcon {
@@ -14,20 +12,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-def ee_initialize(force_use_service_account=False):
-    if force_use_service_account or "ee_service" in st.secrets:
-        json_credentials = st.secrets["ee_service"]
-        credentials_dict = json.loads(json_credentials)
-        if 'client_email' not in credentials_dict:
-            raise ValueError("Service account info is missing 'client_email' field.")
-        credentials = service_account.Credentials.from_service_account_info(
-            credentials_dict, scopes=oauth.SCOPES
-        )
-        ee.Initialize(credentials)
-    else:
-        ee.Initialize()
-# Initialize GEE
-ee_initialize(force_use_service_account=True)
+token = st.secrets['EARTHENGINE_TOKEN']
+geemap.ee_initialize(token_name=token)
 
 st.title('Raster Calculator')
 st.write('Calculate indices such as NDVI, NDMI, NDWI and more for your region of interest')
