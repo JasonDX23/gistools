@@ -1,0 +1,12 @@
+venv
+venv/
+
+notebooks
+notebooks/
+
+
+ee-jasondsouza237-d7cfa0b896fb.json
+
+pages/soi_osm_sheet_index.geojson.json
+
+.streamlit\secrets.toml
