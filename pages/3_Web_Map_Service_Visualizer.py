@@ -10,7 +10,6 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
-st.set_page_config(layout='wide')
 st.title("Web Map Service (WMS)")
 st.markdown("""Simply enter the URL of the WMS service
 in the text box below and press Enter to retrieve the layers.""")

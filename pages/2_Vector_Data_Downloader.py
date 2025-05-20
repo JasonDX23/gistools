@@ -18,7 +18,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.set_page_config(layout='wide')
 st.title('GIS Vector Downloader')
 st.markdown('Draw a polygon covering the area of interest to download it as an ESRI Shapefile')
 

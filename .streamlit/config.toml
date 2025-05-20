@@ -2,3 +2,6 @@
 primaryColor="#FF4B4B"
 secondaryBackgroundColor="#F0F2F6"
 font="consolas"
+
+[client]
+showSidebarNavigation = false
