@@ -6,7 +6,6 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
-st.set_page_config(layout='wide')
 
 markdown = """A Streamlit web-app to pre-process geospatial data on the go
 Made by Jason Dsouza"""
