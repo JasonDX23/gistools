@@ -4,8 +4,6 @@ import streamlit as st
 import geemap.foliumap as geemap
 import datetime
 import json
-from ee.oauth import ServiceAccountCredentials
-
 st.markdown("""
 <style>
 #GithubIcon {
@@ -17,11 +15,6 @@ st.markdown("""
 # Load credentials from Streamlit secrets
 service_account = st.secrets['SERVICE_ACCOUNT']
 private_key_dict = st.secrets['ee_service']  # Should be a dictionary, not a file path
-
-# Create credentials and initialize Earth Engine
-credentials = ServiceAccountCredentials(service_account, private_key_dict)
-ee.Initialize(credentials)
-ee.Initialize(credentials)
 
 st.title('Raster Calculator')
 st.write('Calculate indices such as NDVI, NDMI, NDWI and more for your region of interest')
