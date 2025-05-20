@@ -1,4 +1,4 @@
-ee==0.4
+ee
 folium==0.19.6
 geemap==0.35.3
 geopandas==1.0.1
