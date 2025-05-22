@@ -60,10 +60,10 @@ def getNDMI(d1, d2, roi):
 
 m = geemap.Map()
 #geojson_file = st.file_uploader('Upload the GeoJSON file here', type='.geojson')
+AOI = m.draw_last_feature()
+if AOI:
 
-if m.draw_last_feature():
-
-    roi = m.draw_last_feature()
+    roi = AOI
     try:
         if roi:
             m.centerObject(roi,zoom=8)
