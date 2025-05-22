@@ -84,11 +84,13 @@ if geojson_file:
                     m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
                     with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
                             path = tmp.name
-                            geemap.ee_export_image(
+                            geemap.ee_to_geotiff(
                                 ndvi,
                                 filename=path,
+                                bbox=roi,
                                 crs='EPSG:4326',
-                                region=roi.getInfo()
+                                region=roi.getInfo(),
+                                resolution=15
                             )
 
                             with open(path, "rb") as file:
@@ -110,11 +112,13 @@ if geojson_file:
                     ndmi = getNDMI(d1, d2, roi)
                     with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
                             path = tmp.name
-                            geemap.ee_export_image(
+                            geemap.ee_to_geotiff(
                                 ndmi,
                                 filename=path,
+                                bbox=roi,
                                 crs='EPSG:4326',
-                                region=roi.getInfo()
+                                region=roi.getInfo(),
+                                resolution=15
                             )
 
                             with open(path, "rb") as file:
