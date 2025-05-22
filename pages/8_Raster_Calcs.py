@@ -4,6 +4,7 @@ import streamlit as st
 import geemap.foliumap as geemap
 import datetime
 import json
+import os
 st.markdown("""
 <style>
 #GithubIcon {
@@ -12,8 +13,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-token = st.secrets['EARTHENGINE_TOKEN']
-geemap.ee_initialize(token_name=token)
+os.environ['EARTHENGINE_TOKEN'] == st.secrets['EARTHENGINE_TOKEN']
 
 st.title('Raster Calculator')
 st.write('Calculate indices such as NDVI, NDMI, NDWI and more for your region of interest')
