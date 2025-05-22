@@ -22,7 +22,7 @@ credentials = ee.ServiceAccountCredentials(
     "service_account.json"
 )
 ee.Initialize(credentials)
-st.title('Raster Calculator')
+st.title('Raster Calcs')
 st.write('Calculate indices such as NDVI, NDMI, NDWI and more for your region of interest')
 
 # Function to calculate NDVI
