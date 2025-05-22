@@ -87,12 +87,13 @@ if geojson_file:
                             geemap.ee_export_image(
                                 ndvi,
                                 filename=path,
+                                crs='EPSG:4326',
                                 region=roi.getInfo()
                             )
 
                             with open(path, "rb") as file:
                                 st.download_button(
-                                    label="Click to download NDVI GeoTIFF",
+                                    label="Download NDVI GeoTIFF",
                                     data=file,
                                     file_name="ndvi.tif",
                                     mime="image/tiff"
@@ -112,12 +113,13 @@ if geojson_file:
                             geemap.ee_export_image(
                                 ndmi,
                                 filename=path,
+                                crs='EPSG:4326',
                                 region=roi.getInfo()
                             )
 
                             with open(path, "rb") as file:
                                 st.download_button(
-                                    label="Click to download NDMI GeoTIFF",
+                                    label="Download NDMI GeoTIFF",
                                     data=file,
                                     file_name="ndmi.tif",
                                     mime="image/tiff"
