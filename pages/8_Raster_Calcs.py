@@ -61,9 +61,8 @@ def getNDMI(d1, d2, roi):
 m = geemap.Map()
 m.to_streamlit(height=600)
 #geojson_file = st.file_uploader('Upload the GeoJSON file here', type='.geojson')
-AOI = m.draw_last_feature()
+AOI = m.user_roi
 if AOI:
-
     roi = AOI
     try:
         if roi:
