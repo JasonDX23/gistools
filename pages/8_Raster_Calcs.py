@@ -59,7 +59,6 @@ def getNDMI(d1, d2, roi):
 
 
 m = geemap.Map()
-m.to_streamlit(height=600)
 #geojson_file = st.file_uploader('Upload the GeoJSON file here', type='.geojson')
 roi = m.user_roi
 if roi:
@@ -90,4 +89,6 @@ if roi:
     else:
                 st.write('Please select date range')
 else:
-    st.warning('Please draw a region of interest using any of the drawing tools')
+    st.info('Please draw a region of interest using any of the drawing tools')
+
+m.to_streamlit(height=600)
