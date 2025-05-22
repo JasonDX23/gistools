@@ -59,46 +59,41 @@ def getNDMI(d1, d2, roi):
 
 
 m = geemap.Map()
-if 'roi' not in st.session_state:
-    st.session_state.roi = None
+geojson_file = st.file_uploader('Upload the GeoJSON file here', type='.geojson')
 
-if st.button("Use Drawn ROI"):
-    if m.draw_last_feature:
-        st.session_state.roi = m.draw_last_feature
-    else:
-        st.warning("No ROI found. Please draw a polygon on the map.")
-
-# Proceed if ROI is stored
-roi = st.session_state.roi
-#geojson_file = st.file_uploader('Upload the GeoJSON file here', type='.geojson')
-if roi:
-    d1 = st.date_input('Starting Date', value=None, format='YYYY/MM/DD')
-    d2 = st.date_input('Ending Date', value=None, format='YYYY/MM/DD')
-    if d1 and d2:
-        option = st.selectbox('Calculate', ('NDVI', 'NDMI', 'NDWI'),
+if geojson_file:
+    geojson_data = json.load(geojson_file)
+    try:
+        roi = ee.Geometry(geojson_data["features"][0]["geometry"])
+        if roi:
+            m.centerObject(roi,zoom=8)
+            d1 = st.date_input('Starting Date', value=None, format='YYYY/MM/DD')
+            d2 = st.date_input('Ending Date', value=None, format='YYYY/MM/DD')
+            if d1 and d2:
+                option = st.selectbox('Calculate', ('NDVI', 'NDMI', 'NDWI'),
                                     index=None,
                                     placeholder='Select Indice...')
                 # For NDVI
-        if option == 'NDVI':
-            palette = [
+                if option == 'NDVI':
+                    palette = [
                             'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
                             '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
                             '012E01', '011D01', '011301'
                         ]
 
-            m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
+                    m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
 
-        elif option == 'NDMI':
-             palette = [
+                elif option == 'NDMI':
+                    palette = [
                             'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
                             '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
                             '012E01', '011D01', '011301'
                         ]
 
-        m.addLayer(getNDMI(d1, d2, roi), {'palette': palette}, "NDMI")
-    else:
+                    m.addLayer(getNDMI(d1, d2, roi), {'palette': palette}, "NDMI")
+            else:
                 st.write('Please select date range')
-else:
-    st.info('Please draw a region of interest using any of the drawing tools')
+    except Exception as e:
+        st.error(f"Failed to load ROI: {e}")
 
 m.to_streamlit(height=600)
