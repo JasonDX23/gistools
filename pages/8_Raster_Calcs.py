@@ -4,7 +4,7 @@ import streamlit as st
 import geemap.foliumap as geemap
 import datetime
 import json
-import os
+import tempfile
 st.markdown("""
 <style>
 #GithubIcon {
@@ -82,8 +82,23 @@ if geojson_file:
                         ]
                     ndvi = getNDVI(d1, d2, roi)
                     m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
-                    if st.button('Download GeoTIFF'):
-                        geemap.ee_export_image(ndvi, filename='ndvi.tiff', scale=100, region=roi.getInfo())
+                    if st.button('Download NDVI GeoTIFF'):
+                        with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
+                            path = tmp.name
+                            geemap.ee_export_image(
+                                ndvi,
+                                filename=path,
+                                scale=100,
+                                region=roi.getInfo()
+                            )
+
+                            with open(path, "rb") as file:
+                                st.download_button(
+                                    label="Click to download NDVI GeoTIFF",
+                                    data=file,
+                                    file_name="ndvi.tif",
+                                    mime="image/tiff"
+                                )
 
                 elif option == 'NDMI':
                     palette = [
@@ -94,8 +109,23 @@ if geojson_file:
 
                     m.addLayer(getNDMI(d1, d2, roi), {'palette': palette}, "NDMI")
                     ndmi = getNDMI(d1, d2, roi)
-                    if st.button('Download GeoTIFF'):
-                        geemap.ee_export_image(ndmi, filename='ndmi.tiff', scale=100, region=roi.getInfo())
+                    if st.button('Download NDMI GeoTIFF'):
+                        with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
+                            path = tmp.name
+                            geemap.ee_export_image(
+                                ndmi,
+                                filename=path,
+                                scale=100,
+                                region=roi.getInfo()
+                            )
+
+                            with open(path, "rb") as file:
+                                st.download_button(
+                                    label="Click to download NDMI GeoTIFF",
+                                    data=file,
+                                    file_name="ndmi.tif",
+                                    mime="image/tiff"
+                                )
             else:
                 st.write('Please select date range')
     except Exception as e:
