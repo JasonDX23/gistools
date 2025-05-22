@@ -81,13 +81,14 @@ if geojson_file:
                             '012E01', '011D01', '011301'
                         ]
                     ndvi = getNDVI(d1, d2, roi)
+                    bbox = m.user_roi()
                     m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
                     with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
                             path = tmp.name
                             geemap.ee_to_geotiff(
                                 ndvi,
                                 path,
-                                bbox=roi.getInfo(),
+                                bbox,
                                 crs='EPSG:4326',
                                 resolution=15
                             )
@@ -109,12 +110,13 @@ if geojson_file:
 
                     m.addLayer(getNDMI(d1, d2, roi), {'palette': palette}, "NDMI")
                     ndmi = getNDMI(d1, d2, roi)
+                    bbox = m.user_roi()
                     with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
                             path = tmp.name
                             geemap.ee_to_geotiff(
                                 ndmi,
                                 path,
-                                bbox=roi.getInfo(),
+                                bbox,
                                 crs='EPSG:4326',
                                 resolution=15
                             )
