@@ -59,7 +59,6 @@ def getNDMI(d1, d2, roi):
 
 
 m = geemap.Map()
-m.to_streamlit(height=600)
 #geojson_file = st.file_uploader('Upload the GeoJSON file here', type='.geojson')
 AOI = m.user_roi
 if AOI:
@@ -97,3 +96,5 @@ if AOI:
         st.error(f"Failed to load ROI: {e}")
 else:
     st.warning('Please draw a region of interest using any of the drawing tools')
+
+m.to_streamlit(height=600)
