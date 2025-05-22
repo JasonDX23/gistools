@@ -87,7 +87,6 @@ if geojson_file:
                             geemap.ee_export_image(
                                 ndvi,
                                 filename=path,
-                                scale=250,
                                 region=roi.getInfo()
                             )
 
@@ -113,7 +112,6 @@ if geojson_file:
                             geemap.ee_export_image(
                                 ndmi,
                                 filename=path,
-                                scale=250,
                                 region=roi.getInfo()
                             )
 
