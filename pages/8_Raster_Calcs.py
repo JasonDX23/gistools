@@ -83,7 +83,7 @@ if geojson_file:
                     ndvi = getNDVI(d1, d2, roi)
                     m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
                     if st.button('Download GeoTIFF'):
-                        geemap.ee_export_image(ndvi, filename=ndvi.tiff, scale=100, region=roi.getInfo())
+                        geemap.ee_export_image(ndvi, filename='ndvi.tiff', scale=100, region=roi.getInfo())
 
                 elif option == 'NDMI':
                     palette = [
@@ -93,6 +93,9 @@ if geojson_file:
                         ]
 
                     m.addLayer(getNDMI(d1, d2, roi), {'palette': palette}, "NDMI")
+                    ndmi = getNDMI(d1, d2, roi)
+                    if st.button('Download GeoTIFF'):
+                        geemap.ee_export_image(ndmi, filename='ndmi.tiff', scale=100, region=roi.getInfo())
             else:
                 st.write('Please select date range')
     except Exception as e:
