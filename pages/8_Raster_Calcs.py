@@ -83,7 +83,7 @@ if geojson_file:
                     ndvi = getNDVI(d1, d2, roi)
                     m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
                     if st.button('Download GeoTIFF'):
-                        geemap.ee_export_image(ndvi, filename=ndvi.tiff, scale=100)
+                        geemap.ee_export_image(ndvi, filename=ndvi.tiff, scale=100, region=roi.getInfo())
 
                 elif option == 'NDMI':
                     palette = [
