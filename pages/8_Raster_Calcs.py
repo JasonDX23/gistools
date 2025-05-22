@@ -96,3 +96,5 @@ if AOI:
                 st.write('Please select date range')
     except Exception as e:
         st.error(f"Failed to load ROI: {e}")
+else:
+    st.warning('Please draw a region of interest using any of the drawing tools')
