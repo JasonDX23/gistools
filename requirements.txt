@@ -13,3 +13,4 @@ streamlit==1.45.1
 streamlit_folium==0.25.0
 streamlit_image_coordinates==0.2.1
 owslib
+osgeo

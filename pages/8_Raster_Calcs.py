@@ -5,6 +5,7 @@ import geemap.foliumap as geemap
 import datetime
 import json
 import tempfile
+import osgeo
 st.markdown("""
 <style>
 #GithubIcon {
