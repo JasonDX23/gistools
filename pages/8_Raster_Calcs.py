@@ -14,7 +14,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 os.environ['EARTHENGINE_TOKEN'] == st.secrets['EARTHENGINE_TOKEN']
-
+geemap.ee_initialize()
 st.title('Raster Calculator')
 st.write('Calculate indices such as NDVI, NDMI, NDWI and more for your region of interest')
 
