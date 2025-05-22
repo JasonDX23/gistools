@@ -87,7 +87,7 @@ if geojson_file:
                             geemap.ee_to_geotiff(
                                 ndvi,
                                 path,
-                                bbox=roi,
+                                bbox=roi.getInfo(),
                                 crs='EPSG:4326',
                                 resolution=15
                             )
@@ -114,7 +114,7 @@ if geojson_file:
                             geemap.ee_to_geotiff(
                                 ndmi,
                                 path,
-                                bbox=roi,
+                                bbox=roi.getInfo(),
                                 crs='EPSG:4326',
                                 resolution=15
                             )
