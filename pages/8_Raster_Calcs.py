@@ -13,17 +13,15 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-ee_service_dict = dict(st.secrets["ee_service"])
-
-# Save to JSON file
 with open("service_account.json", "w") as f:
-    json.dump(ee_service_dict, f)
+    json.dump(dict(st.secrets["ee_service"]), f)
 
-# Set environment variable
-os.environ["EARTHENGINE_TOKEN"] = "service_account.json"
-
-# Initialize Earth Engine
-geemap.ee_initialize()
+# Initialize with service account
+credentials = ee.ServiceAccountCredentials(
+    st.secrets["ee_service"]["client_email"],
+    "service_account.json"
+)
+ee.Initialize(credentials)
 st.title('Raster Calculator')
 st.write('Calculate indices such as NDVI, NDMI, NDWI and more for your region of interest')
 
