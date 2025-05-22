@@ -13,13 +13,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-with open("service_account.json", "w") as f:
-    json.dump(st.secrets["ee_service"], f)
+ee_service_dict = dict(st.secrets["ee_service"])
 
-# Set the environment variable
+# Save to JSON file
+with open("service_account.json", "w") as f:
+    json.dump(ee_service_dict, f)
+
+# Set environment variable
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "service_account.json"
 
-# Let geemap handle the rest
+# Initialize Earth Engine
 geemap.ee_initialize()
 st.title('Raster Calculator')
 st.write('Calculate indices such as NDVI, NDMI, NDWI and more for your region of interest')
