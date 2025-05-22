@@ -82,13 +82,12 @@ if geojson_file:
                         ]
                     ndvi = getNDVI(d1, d2, roi)
                     m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
-                    if st.button('Download NDVI GeoTIFF'):
-                        with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
+                    with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
                             path = tmp.name
                             geemap.ee_export_image(
                                 ndvi,
                                 filename=path,
-                                scale=100,
+                                scale=250,
                                 region=roi.getInfo()
                             )
 
@@ -109,13 +108,12 @@ if geojson_file:
 
                     m.addLayer(getNDMI(d1, d2, roi), {'palette': palette}, "NDMI")
                     ndmi = getNDMI(d1, d2, roi)
-                    if st.button('Download NDMI GeoTIFF'):
-                        with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
+                    with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
                             path = tmp.name
                             geemap.ee_export_image(
                                 ndmi,
                                 filename=path,
-                                scale=100,
+                                scale=250,
                                 region=roi.getInfo()
                             )
 
