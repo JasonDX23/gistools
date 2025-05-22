@@ -59,8 +59,18 @@ def getNDMI(d1, d2, roi):
 
 
 m = geemap.Map()
+if 'roi' not in st.session_state:
+    st.session_state.roi = None
+
+if st.button("Use Drawn ROI"):
+    if m.user_roi:
+        st.session_state.roi = m.user_roi
+    else:
+        st.warning("No ROI found. Please draw a polygon on the map.")
+
+# Proceed if ROI is stored
+roi = st.session_state.roi
 #geojson_file = st.file_uploader('Upload the GeoJSON file here', type='.geojson')
-roi = m.user_roi
 if roi:
     d1 = st.date_input('Starting Date', value=None, format='YYYY/MM/DD')
     d2 = st.date_input('Ending Date', value=None, format='YYYY/MM/DD')
