@@ -4,8 +4,7 @@ import streamlit as st
 import geemap.foliumap as geemap
 import datetime
 import json
-import tempfile
-import osgeo
+import os
 st.markdown("""
 <style>
 #GithubIcon {
@@ -81,26 +80,8 @@ if geojson_file:
                             '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
                             '012E01', '011D01', '011301'
                         ]
-                    ndvi = getNDVI(d1, d2, roi)
-                    bbox = roi
-                    m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
-                    with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
-                            path = tmp.name
-                            geemap.ee_to_geotiff(
-                                ndvi,
-                                path,
-                                bbox,
-                                crs='EPSG:4326',
-                                resolution=15
-                            )
 
-                            with open(path, "rb") as file:
-                                st.download_button(
-                                    label="Download NDVI GeoTIFF",
-                                    data=file,
-                                    file_name="ndvi.tif",
-                                    mime="image/tiff"
-                                )
+                    m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
 
                 elif option == 'NDMI':
                     palette = [
@@ -110,25 +91,6 @@ if geojson_file:
                         ]
 
                     m.addLayer(getNDMI(d1, d2, roi), {'palette': palette}, "NDMI")
-                    ndmi = getNDMI(d1, d2, roi)
-                    bbox = roi
-                    with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
-                            path = tmp.name
-                            geemap.ee_to_geotiff(
-                                ndmi,
-                                path,
-                                bbox,
-                                crs='EPSG:4326',
-                                resolution=15
-                            )
-
-                            with open(path, "rb") as file:
-                                st.download_button(
-                                    label="Download NDMI GeoTIFF",
-                                    data=file,
-                                    file_name="ndmi.tif",
-                                    mime="image/tiff"
-                                )
             else:
                 st.write('Please select date range')
     except Exception as e:
