@@ -80,8 +80,10 @@ if geojson_file:
                             '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
                             '012E01', '011D01', '011301'
                         ]
-
+                    ndvi = getNDVI(d1, d2, roi)
                     m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
+                    if st.button('Download GeoTIFF'):
+                        geemap.ee_export_image(ndvi, filename=ndvi.tiff, scale=100)
 
                 elif option == 'NDMI':
                     palette = [
