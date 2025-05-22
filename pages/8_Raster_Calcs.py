@@ -58,13 +58,13 @@ def getNDMI(d1, d2, roi):
 
 
 
-m = geemap.Map(Draw_export=True)
-geojson_file = st.file_uploader('Upload the GeoJSON file here', type='.geojson')
+m = geemap.Map()
+#geojson_file = st.file_uploader('Upload the GeoJSON file here', type='.geojson')
 
-if geojson_file:
-    geojson_data = json.load(geojson_file)
+if m.draw_last_feature():
+
+    roi = m.draw_last_feature()
     try:
-        roi = ee.Geometry(geojson_data["features"][0]["geometry"])
         if roi:
             m.centerObject(roi,zoom=8)
             d1 = st.date_input('Starting Date', value=None, format='YYYY/MM/DD')
