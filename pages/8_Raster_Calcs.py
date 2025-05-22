@@ -63,8 +63,8 @@ if 'roi' not in st.session_state:
     st.session_state.roi = None
 
 if st.button("Use Drawn ROI"):
-    if m.user_roi:
-        st.session_state.roi = m.user_roi
+    if m.draw_last_feature:
+        st.session_state.roi = m.draw_last_feature
     else:
         st.warning("No ROI found. Please draw a polygon on the map.")
 
