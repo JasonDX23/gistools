@@ -1,6 +1,9 @@
 import streamlit as st
 from pathlib import Path
 from bs4 import BeautifulSoup
+import streamlit
+import streamlit.components
+import streamlit.components.v1
 st.markdown("""
 <style>
 #GithubIcon {
@@ -12,14 +15,15 @@ st.markdown("""
 ga_code = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6295389454311117"
      crossorigin="anonymous"></script>"""
 
-index_path = Path(st.__file__).parent / "static" / 'index.html'
-soup = BeautifulSoup(index_path.read_text(), features='lxml')
+streamlit.components.v1.html(ga_code)
+# index_path = Path(st.__file__).parent / "static" / 'index.html'
+# soup = BeautifulSoup(index_path.read_text(), features='lxml')
 
-if not soup.find(id='custom-js'):
-    script_tag = soup.new_tag('script', id='custom-js')
-    script_tag.string = ga_code
-    soup.head.append(script_tag)
-    index_path.write_text(str(soup))
+# if not soup.find(id='custom-js'):
+#     script_tag = soup.new_tag('script', id='custom-js')
+#     script_tag.string = ga_code
+#     soup.head.append(script_tag)
+#     index_path.write_text(str(soup))
 
 markdown = """A Streamlit web-app to pre-process geospatial data on the go
 Made by Jason Dsouza"""
