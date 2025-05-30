@@ -1,4 +1,6 @@
 import streamlit as st
+from pathlib import Path
+from bs4 import BeautifulSoup
 st.markdown("""
 <style>
 #GithubIcon {
@@ -7,8 +9,18 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-code = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6295389454311117"
+ga_code = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6295389454311117"
      crossorigin="anonymous"></script>"""
+
+index_path = Path(st.__file__).parent / "static" / 'index.html'
+soup = BeautifulSoup(index_path.read_text(), features='lxml')
+
+if not soup.find(id='custom-js'):
+    script_tag = soup.new_tag('script', id='custom-js')
+    script_tag.string = ga_code
+    soup.head.append(script_tag)
+    index_path.write_text(str(soup))
+
 markdown = """A Streamlit web-app to pre-process geospatial data on the go
 Made by Jason Dsouza"""
 
@@ -27,4 +39,3 @@ if middle.button('Raster Calcs', use_container_width=True):
     st.switch_page('pages/8_Raster_Calcs.py')
 if right.button('Plot WMS', use_container_width=True):
     st.switch_page('pages/3_Web_Map_Service_Visualizer.py')
-st.markdown(code, unsafe_allow_html=True)
