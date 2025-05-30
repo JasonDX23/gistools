@@ -3,7 +3,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 import streamlit
 import streamlit.components
-import streamlit.components.v1
+import streamlit.components.v1 as components
 st.markdown("""
 <style>
 #GithubIcon {
@@ -15,7 +15,6 @@ st.markdown("""
 ga_code = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6295389454311117"
      crossorigin="anonymous"></script>"""
 
-streamlit.components.v1.html(ga_code)
 # index_path = Path(st.__file__).parent / "static" / 'index.html'
 # soup = BeautifulSoup(index_path.read_text(), features='lxml')
 
@@ -43,3 +42,6 @@ if middle.button('Raster Calcs', use_container_width=True):
     st.switch_page('pages/8_Raster_Calcs.py')
 if right.button('Plot WMS', use_container_width=True):
     st.switch_page('pages/3_Web_Map_Service_Visualizer.py')
+
+
+components.html(ga_code, height=100)
