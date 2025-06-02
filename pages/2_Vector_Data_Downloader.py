@@ -40,9 +40,7 @@ if output and 'all_drawings' in output:
         # 2. Get building and other features using geometries_from_polygon
         tags = {
             'building': True,
-            'landuse': True,
-            'leisure': ['park', 'pitch', 'playground'],
-            'amenity': ['school', 'hospital', 'airport']
+            'landuse': True
         }
         buildings = ox.features_from_polygon(polygon, tags=tags)
         
