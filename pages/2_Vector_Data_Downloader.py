@@ -48,7 +48,7 @@ if output and 'all_drawings' in output:
         
         # Keep only relevant columns (geometry and address)
         buildings = buildings.loc[:, buildings.columns.str.contains('addr:|geometry')]
-        buildings = buildings.loc[buildings.geometry.type == 'Polygon']
+        buildings = buildings[buildings.geometry.type.isin(['Polygon', 'MultiPolygon'])]
 
         # 3. Ensure matching CRS for all geometries
         edges = edges[['geometry']].to_crs(buildings.crs)
