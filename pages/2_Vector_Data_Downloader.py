@@ -33,31 +33,29 @@ if output and 'all_drawings' in output:
         gdf = gpd.GeoDataFrame(geometry=geometries, crs='EPSG:4326')
         polygon = gdf.iloc[0]['geometry']
 
-        # 1. Get road network from the polygon (returns lines)
-        graph = ox.graph_from_polygon(polygon, network_type='all')
-        _, edges = ox.graph_to_gdfs(graph, edges=True)
+        # 1. Get road network from the polygon
+        g = ox.graph_from_polygon(polygon, network_type='all')
+        _, edges = ox.graph_to_gdfs(g, edges=True)
 
-        # 2. Get buildings and other polygon features
+        # 2. Get building and other features using geometries_from_polygon
         tags = {
             'building': True,
             'landuse': True,
             'leisure': ['park', 'pitch', 'playground'],
-            'amenity': ['school', 'hospital']
+            'amenity': ['school', 'hospital', 'airport']
         }
-        features = ox.features_from_polygon(polygon, tags=tags)
+        buildings = ox.features_from_polygon(polygon, tags=tags)
+        
+        # Keep only relevant columns (geometry and address)
+        buildings = buildings.loc[:, buildings.columns.str.contains('addr:|geometry')]
+        buildings = buildings.loc[buildings.geometry.type == 'Polygon']
 
-        # Filter to keep only Polygon and MultiPolygon geometries
-        polygon_features = features[features.geometry.type.isin(['Polygon', 'MultiPolygon'])]
+        # 3. Ensure matching CRS for all geometries
+        edges = edges[['geometry']].to_crs(buildings.crs)
+        
+        # 4. Combine road and building geometries into one GeoDataFrame
+        combined = gpd.GeoDataFrame(pd.concat([edges, buildings], ignore_index=True), crs=edges.crs)
 
-        # Optional: Drop columns except geometry and any useful tag (e.g., 'building', 'amenity', etc.)
-        keep_cols = ['geometry'] + [col for col in polygon_features.columns if any(tag in col for tag in ['building', 'landuse', 'leisure', 'amenity'])]
-        polygon_features = polygon_features[keep_cols]
-
-        # 3. Reproject edges to same CRS as features (EPSG:4326)
-        edges = edges[['geometry']].to_crs(polygon_features.crs)
-
-        # 4. Combine into one GeoDataFrame
-        combined = gpd.GeoDataFrame(pd.concat([edges, polygon_features], ignore_index=True), crs=edges.crs)
         if not combined.empty:
             with TemporaryDirectory() as tmpdir:
                 shp_dir = os.path.join(tmpdir, "shapefile_output")
