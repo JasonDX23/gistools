@@ -1,10 +1,11 @@
-from io import StringIO
 import ee
 import streamlit as st
 import geemap.foliumap as geemap
 import datetime
 import json
 import os
+
+# Hide GitHub icon
 st.markdown("""
 <style>
 #GithubIcon {
@@ -13,87 +14,86 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Write service account credentials
 with open("service_account.json", "w") as f:
     json.dump(dict(st.secrets["ee_service"]), f)
 
-# Initialize with service account
+# Authenticate and initialize Earth Engine
 credentials = ee.ServiceAccountCredentials(
     st.secrets["ee_service"]["client_email"],
     "service_account.json"
 )
 ee.Initialize(credentials)
+
+# App title and instructions
 st.title('Raster Calcs')
-st.write('Calculate indices such as NDVI, NDMI, NDWI and more for your region of interest')
+st.write('Draw a polygon on the map to calculate indices such as NDVI and NDMI.')
 
-# Function to calculate NDVI
+# ------------------------ Functions ------------------------
+
 def getNDVI(d1, d2, roi):
-    d1_str = d1.strftime('%Y-%m-%d')
-    d2_str = d2.strftime('%Y-%m-%d')
     collection = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
-    .filterDate(d1_str, d2_str)
-    .select(['B8', 'B4'])
-    .filterBounds(roi))
-
-    median_image = collection.median()
-    NIR = median_image.select('B8')
-    red = median_image.select('B4')
-
-    ndvi = NIR.subtract(red).divide(NIR.add(red))
-    return ndvi
+        .filterDate(d1.strftime('%Y-%m-%d'), d2.strftime('%Y-%m-%d'))
+        .select(['B8', 'B4'])
+        .filterBounds(roi))
+    image = collection.median()
+    return image.normalizedDifference(['B8', 'B4']).rename('NDVI')
 
 def getNDMI(d1, d2, roi):
-    d1_str = d1.strftime('%Y-%m-%d')
-    d2_str = d2.strftime('%Y-%m-%d')
     collection = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
-    .filterDate(d1_str, d2_str)
-    .select(['B8', 'B11'])
-    .filterBounds(roi))
+        .filterDate(d1.strftime('%Y-%m-%d'), d2.strftime('%Y-%m-%d'))
+        .select(['B8', 'B11'])
+        .filterBounds(roi))
+    image = collection.median()
+    return image.normalizedDifference(['B8', 'B11']).rename('NDMI')
 
-    median_image = collection.median()
-    NIR = median_image.select('B8')
-    swir1 = median_image.select('B11')
+# ------------------------ Map Setup ------------------------
 
-    ndmi = NIR.subtract(swir1).divide(NIR.add(swir1))
-    return ndmi
+m = geemap.Map(center=[20, 78], zoom=4)
+m.add_basemap('SATELLITE')
+m.add_draw_control()
 
+# Display the map
+m.to_streamlit(height=600)
 
+# ------------------------ UI and Processing ------------------------
 
-m = geemap.Map()
-geojson_file = st.file_uploader('Upload the GeoJSON file here', type='.geojson')
-
-if geojson_file:
-    geojson_data = json.load(geojson_file)
+if m.user_roi:
     try:
-        roi = ee.Geometry(geojson_data["features"][0]["geometry"])
-        if roi:
-            m.centerObject(roi,zoom=8)
-            d1 = st.date_input('Starting Date', value=None, format='YYYY/MM/DD')
-            d2 = st.date_input('Ending Date', value=None, format='YYYY/MM/DD')
-            if d1 and d2:
-                option = st.selectbox('Calculate', ('NDVI', 'NDMI', 'NDWI'),
-                                    index=None,
-                                    placeholder='Select Indice...')
-                # For NDVI
-                if option == 'NDVI':
-                    palette = [
-                            'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
-                            '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
-                            '012E01', '011D01', '011301'
-                        ]
+        roi = m.user_roi  # This is already an ee.Geometry object
 
-                    m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
+        d1 = st.date_input('Start Date', format='YYYY/MM/DD')
+        d2 = st.date_input('End Date', format='YYYY/MM/DD')
+
+        if d1 and d2:
+            option = st.selectbox('Calculate', ('NDVI', 'NDMI'), index=None, placeholder='Select Index...')
+
+            if option:
+                palette = [
+                    'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
+                    '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
+                    '012E01', '011D01', '011301'
+                ]
+
+                if option == 'NDVI':
+                    layer = getNDVI(d1, d2, roi)
+                    m.addLayer(layer, {'min': -1, 'max': 1, 'palette': palette}, 'NDVI')
+                    m.add_legend(title='NDVI', palette=palette, labels=[
+                        '-1.0', '-0.8', '-0.6', '-0.4', '-0.2',
+                        '0.0', '0.2', '0.4', '0.6', '0.8', '1.0'
+                    ])
 
                 elif option == 'NDMI':
-                    palette = [
-                            'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
-                            '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
-                            '012E01', '011D01', '011301'
-                        ]
+                    layer = getNDMI(d1, d2, roi)
+                    m.addLayer(layer, {'min': -1, 'max': 1, 'palette': palette}, 'NDMI')
+                    m.add_legend(title='NDMI', palette=palette, labels=[
+                        '-1.0', '-0.8', '-0.6', '-0.4', '-0.2',
+                        '0.0', '0.2', '0.4', '0.6', '0.8', '1.0'
+                    ])
 
-                    m.addLayer(getNDMI(d1, d2, roi), {'palette': palette}, "NDMI")
-            else:
-                st.write('Please select date range')
+                m.to_streamlit(height=600)
+
     except Exception as e:
-        st.error(f"Failed to load ROI: {e}")
-
-m.to_streamlit(height=600)
+        st.error(f"Failed to process drawn region: {e}")
+else:
+    st.info("Draw a polygon on the map to begin.")
