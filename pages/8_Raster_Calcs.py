@@ -1,7 +1,6 @@
 import ee
 import streamlit as st
 import geemap.foliumap as geemap
-import datetime
 import json
 import os
 
@@ -25,7 +24,7 @@ credentials = ee.ServiceAccountCredentials(
 )
 ee.Initialize(credentials)
 
-# App title and instructions
+# App title
 st.title('Raster Calcs')
 st.write('Draw a polygon on the map to calculate indices such as NDVI and NDMI.')
 
@@ -47,24 +46,27 @@ def getNDMI(d1, d2, roi):
     image = collection.median()
     return image.normalizedDifference(['B8', 'B11']).rename('NDMI')
 
-# ------------------------ Map Setup ------------------------
+# ------------------------ Map and Drawing ------------------------
 
 m = geemap.Map(center=[20, 78], zoom=4)
-m.add_basemap('SATELLITE')
-m.add_draw_control()
+m.add_basemap("SATELLITE")
 
-# Display the map
+# Display the map in Streamlit
+st.subheader("Draw a polygon on the map")
 m.to_streamlit(height=600)
 
-# ------------------------ UI and Processing ------------------------
-
-if m.user_roi:
+# Access drawn features (GeoJSON list of features)
+if m.draw_features:
     try:
-        roi = m.user_roi  # This is already an ee.Geometry object
+        # Assume user drew one polygon
+        first_feature = m.draw_features[0]["geometry"]
+        roi = ee.Geometry(first_feature)
 
-        d1 = st.date_input('Start Date', format='YYYY/MM/DD')
-        d2 = st.date_input('End Date', format='YYYY/MM/DD')
+        # Date selection
+        d1 = st.date_input("Start Date")
+        d2 = st.date_input("End Date")
 
+        # Index selection
         if d1 and d2:
             option = st.selectbox('Calculate', ('NDVI', 'NDMI'), index=None, placeholder='Select Index...')
 
@@ -74,26 +76,21 @@ if m.user_roi:
                     '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
                     '012E01', '011D01', '011301'
                 ]
+                vis = {'min': -1, 'max': 1, 'palette': palette}
 
-                if option == 'NDVI':
-                    layer = getNDVI(d1, d2, roi)
-                    m.addLayer(layer, {'min': -1, 'max': 1, 'palette': palette}, 'NDVI')
-                    m.add_legend(title='NDVI', palette=palette, labels=[
-                        '-1.0', '-0.8', '-0.6', '-0.4', '-0.2',
-                        '0.0', '0.2', '0.4', '0.6', '0.8', '1.0'
-                    ])
+                if option == "NDVI":
+                    image = getNDVI(d1, d2, roi)
+                    m.addLayer(image, vis, "NDVI")
+                    m.add_legend(title="NDVI", palette=palette)
 
-                elif option == 'NDMI':
-                    layer = getNDMI(d1, d2, roi)
-                    m.addLayer(layer, {'min': -1, 'max': 1, 'palette': palette}, 'NDMI')
-                    m.add_legend(title='NDMI', palette=palette, labels=[
-                        '-1.0', '-0.8', '-0.6', '-0.4', '-0.2',
-                        '0.0', '0.2', '0.4', '0.6', '0.8', '1.0'
-                    ])
+                elif option == "NDMI":
+                    image = getNDMI(d1, d2, roi)
+                    m.addLayer(image, vis, "NDMI")
+                    m.add_legend(title="NDMI", palette=palette)
 
                 m.to_streamlit(height=600)
 
     except Exception as e:
-        st.error(f"Failed to process drawn region: {e}")
+        st.error(f"Error processing drawn feature: {e}")
 else:
-    st.info("Draw a polygon on the map to begin.")
+    st.info("Please draw a polygon on the map above.")
