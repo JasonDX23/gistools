@@ -1,10 +1,10 @@
+from io import StringIO
 import ee
 import streamlit as st
 import geemap.foliumap as geemap
+import datetime
 import json
 import os
-
-# Hide GitHub icon
 st.markdown("""
 <style>
 #GithubIcon {
@@ -13,84 +13,94 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Write service account credentials
 with open("service_account.json", "w") as f:
     json.dump(dict(st.secrets["ee_service"]), f)
 
-# Authenticate and initialize Earth Engine
+# Initialize with service account
 credentials = ee.ServiceAccountCredentials(
     st.secrets["ee_service"]["client_email"],
     "service_account.json"
 )
 ee.Initialize(credentials)
-
-# App title
 st.title('Raster Calcs')
-st.write('Draw a polygon on the map to calculate indices such as NDVI and NDMI.')
+st.write('Calculate indices such as NDVI, NDMI, NDWI and more for your region of interest')
 
-# ------------------------ Functions ------------------------
-
+# Function to calculate NDVI
 def getNDVI(d1, d2, roi):
+    d1_str = d1.strftime('%Y-%m-%d')
+    d2_str = d2.strftime('%Y-%m-%d')
     collection = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
-        .filterDate(d1.strftime('%Y-%m-%d'), d2.strftime('%Y-%m-%d'))
-        .select(['B8', 'B4'])
-        .filterBounds(roi))
-    image = collection.median()
-    return image.normalizedDifference(['B8', 'B4']).rename('NDVI')
+    .filterDate(d1_str, d2_str)
+    .select(['B8', 'B4'])
+    .filterBounds(roi))
+
+    median_image = collection.median()
+    NIR = median_image.select('B8')
+    red = median_image.select('B4')
+
+    ndvi = NIR.subtract(red).divide(NIR.add(red))
+    return ndvi
 
 def getNDMI(d1, d2, roi):
+    d1_str = d1.strftime('%Y-%m-%d')
+    d2_str = d2.strftime('%Y-%m-%d')
     collection = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
-        .filterDate(d1.strftime('%Y-%m-%d'), d2.strftime('%Y-%m-%d'))
-        .select(['B8', 'B11'])
-        .filterBounds(roi))
-    image = collection.median()
-    return image.normalizedDifference(['B8', 'B11']).rename('NDMI')
+    .filterDate(d1_str, d2_str)
+    .select(['B8', 'B11'])
+    .filterBounds(roi))
 
-# ------------------------ Map and Drawing ------------------------
+    median_image = collection.median()
+    NIR = median_image.select('B8')
+    swir1 = median_image.select('B11')
 
-m = geemap.Map(center=[20, 78], zoom=4)
-m.add_basemap("SATELLITE")
+    ndmi = NIR.subtract(swir1).divide(NIR.add(swir1))
+    return ndmi
 
-# Display the map in Streamlit
-st.subheader("Draw a polygon on the map")
-m.to_streamlit(height=600)
 
-# Access drawn features (GeoJSON list of features)
-if m.draw_features:
+
+m = geemap.Map()
+geojson_file = st.file_uploader('Upload a GeoJSON of your study area', type='.geojson')
+
+if geojson_file:
+    geojson_data = json.load(geojson_file)
     try:
-        # Assume user drew one polygon
-        first_feature = m.draw_features[0]["geometry"]
-        roi = ee.Geometry(first_feature)
+        roi = ee.Geometry(geojson_data["features"][0]["geometry"])
+        if roi:
+            m.centerObject(roi,zoom=8)
+            d1 = st.date_input('Starting Date', value=None, format='YYYY/MM/DD')
+            d2 = st.date_input('Ending Date', value=None, format='YYYY/MM/DD')
+            if d1 and d2:
+                option = st.selectbox('Calculate', ('NDVI', 'NDMI', 'NDWI'),
+                                    index=None,
+                                    placeholder='Select Indice...')
+                # For NDVI
+                if option:
+                    palette = [
+                        'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
+                        '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
+                        '012E01', '011D01', '011301'
+                    ]
+                    vis = {'min': -1, 'max': 1, 'palette': palette}
+                    if option == 'NDVI':
+                        palette = [
+                                'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
+                                '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
+                                '012E01', '011D01', '011301'
+                            ]
 
-        # Date selection
-        d1 = st.date_input("Start Date")
-        d2 = st.date_input("End Date")
+                        m.addLayer(getNDVI(d1, d2, roi), {'palette': palette}, "NDVI")
 
-        # Index selection
-        if d1 and d2:
-            option = st.selectbox('Calculate', ('NDVI', 'NDMI'), index=None, placeholder='Select Index...')
+                    elif option == 'NDMI':
+                        palette = [
+                                'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
+                                '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
+                                '012E01', '011D01', '011301'
+                            ]
 
-            if option:
-                palette = [
-                    'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
-                    '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
-                    '012E01', '011D01', '011301'
-                ]
-                vis = {'min': -1, 'max': 1, 'palette': palette}
-
-                if option == "NDVI":
-                    image = getNDVI(d1, d2, roi)
-                    m.addLayer(image, vis, "NDVI")
-                    m.add_legend(title="NDVI", palette=palette)
-
-                elif option == "NDMI":
-                    image = getNDMI(d1, d2, roi)
-                    m.addLayer(image, vis, "NDMI")
-                    m.add_legend(title="NDMI", palette=palette)
-
-                m.to_streamlit(height=600)
-
+                        m.addLayer(getNDMI(d1, d2, roi), {'palette': palette}, "NDMI")
+            else:
+                st.write('Please select date range')
     except Exception as e:
-        st.error(f"Error processing drawn feature: {e}")
-else:
-    st.info("Please draw a polygon on the map above.")
+        st.error(f"Failed to load ROI: {e}")
+
+m.to_streamlit(height=600)
